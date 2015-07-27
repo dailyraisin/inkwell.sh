@@ -1,0 +1,17 @@
+.tmp/
+
+# OSX stuff
+.DS_Store
+.VolumeIcon.icns
+.fseventsd
+Icon
+.apdisk
+
+# Logs
+logs
+*.log
+
+#vim swap files
+*.swp
+*.swo
+*.bak
