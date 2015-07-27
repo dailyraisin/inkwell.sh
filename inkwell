@@ -1,0 +1,74 @@
+#!/bin/bash
+# Copyright Daily Raisin LLC
+
+SOURCE=$1
+DEST=$2
+
+# check $1 and $2
+if [ "$SOURCE" == "" ]; then # not empty cli arg
+  echo "Usage: inkwell source destination";
+  exit 1;
+fi;
+
+if [ "$DEST" == "" ]; then # not empty cli arg
+  echo "Usage: inkwell source destination";
+  exit 1;
+fi;
+
+# source must be a directory
+if [ ! -d $SOURCE ]; then # directory
+  echo "$SOURCE not a directory. I can only back up directories.";
+  exit 1;
+fi;
+
+#remove trailing slash
+SOURCE="`dirname $SOURCE`/`basename $SOURCE`"
+DEST="`dirname $DEST`/`basename $DEST`"
+
+IGNORE=$SOURCE/.backupignore
+
+#if the last directory name on the path of source equals that of the destination, chop one off the destination to avoid double nesting
+if [ `basename $SOURCE` == `basename $DEST` ]; then
+  DEST=`dirname $DEST`;
+fi;
+
+# destination is has the same basename as source
+DEST="$DEST/`basename $SOURCE`"
+
+DATE=`date "+%Y-%m-%d.%H-%M-%S"`
+INCOMPLETE=${DEST}/incomplete-back-$DATE
+COMPLETE=${DEST}/back-$DATE
+CURRENT=${DEST}/current
+
+if [ ! -d $DEST ]; then # not directory
+  mkdir -p $DEST;
+fi;
+
+if [ ! -w $DEST ]; then # writable
+  echo "$DEST is not writable";
+  exit 1;
+fi;
+
+if [ ! -f $IGNORE ]; then
+  echo "$IGNORE does not exist";
+  exit 1;
+fi;
+
+# must be full path so possibly convert relative path to full path with pwd
+if [[ $DEST = /* ]]; then
+  LINK_DEST=$CURRENT
+else
+  LINK_DEST=`pwd`/$CURRENT;
+fi;
+
+rsync -az \
+  --delete \
+  --delete-excluded \
+  --exclude-from=$IGNORE \
+  --link-dest=$LINK_DEST \
+  $SOURCE $INCOMPLETE \
+&& mv $INCOMPLETE $COMPLETE \
+&& rm -f $CURRENT \
+&& ln -s `basename $COMPLETE`/ $CURRENT
+
+exit 0;
