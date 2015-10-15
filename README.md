@@ -1,5 +1,7 @@
 # Inkwell
 
+** Deprecated ** Renamed and rewritten as [safekeep](https://www.npmjs.com/package/safekeep).
+
 Incremental backups written in bash and rsync.
 
 ## Usage
